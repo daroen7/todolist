@@ -1,45 +1,88 @@
-const inputBox = document.getElementById('input-box')
-const listContainer = document.getElementById('list-container')
+const inputBox = document.getElementById('input-box');
+const listContainer = document.getElementById('list-container');
+const addBtn = document.getElementById('add-btn');
 
-const addTask = () => {
-    if (inputBox.value === '') {
-        alert('You must write somethin\'')
-        return
+// ========== EVENT LISTENERS ==========
+addBtn.addEventListener('click', handleAddTask);
+inputBox.addEventListener('keypress', handleEnterKey);
+listContainer.addEventListener('click', handleListClick);
+
+// ========== FUNCTIONS ==========
+
+// Tambah task
+function handleAddTask() {
+    const taskText = inputBox.value.trim();
+
+    if (!taskText) {
+        alert('You must write something!');
+        return;
     }
-    let li = document.createElement('li')
-    li.innerHTML = inputBox.value;
-    listContainer.appendChild(li)
 
-    let span = document.createElement('span')
-    span.innerHTML = '\u00d7';
-    li.appendChild(span)
+    const li = createTaskElement(taskText);
+    listContainer.appendChild(li);
 
     inputBox.value = '';
-    saveData()
+    saveData();
 }
 
-inputBox.addEventListener('keypress', function (e) {
+// Enter key
+function handleEnterKey(e) {
     if (e.key === 'Enter') {
-        addTask()
+        handleAddTask();
     }
-})
-
-listContainer.addEventListener('click', function (e) {
-    if (e.target.tagName === 'LI') {
-        e.target.classList.toggle('checked')
-        saveData()
-    } else if (e.target.tagName === 'SPAN') {
-        e.target.parentElement.remove()
-        saveData()
-    }
-}, false)
-
-const saveData = () => {
-    localStorage.setItem('data', listContainer.innerHTML)
 }
 
-const showTask = () => {
-    listContainer.innerHTML = localStorage.getItem('data')
+// Klik di list (check / delete)
+function handleListClick(e) {
+    const target = e.target;
+
+    if (target.tagName === 'LI') {
+        toggleTask(target);
+    }
+
+    if (target.tagName === 'SPAN') {
+        deleteTask(target);
+    }
+
+    saveData();
 }
 
-showTask()
+// ========== HELPER FUNCTIONS ==========
+
+// Buat elemen task
+function createTaskElement(text) {
+    const li = document.createElement('li');
+    li.textContent = text;
+
+    const deleteBtn = document.createElement('span');
+    deleteBtn.textContent = '\u00d7';
+
+    li.appendChild(deleteBtn);
+    return li;
+}
+
+// Toggle checked
+function toggleTask(taskElement) {
+    taskElement.classList.toggle('checked');
+}
+
+// Hapus task
+function deleteTask(deleteBtn) {
+    deleteBtn.parentElement.remove();
+}
+
+// Simpan ke localStorage
+function saveData() {
+    localStorage.setItem('tasks', listContainer.innerHTML);
+}
+
+// Load dari localStorage
+function loadData() {
+    const data = localStorage.getItem('tasks');
+    if (data) {
+        listContainer.innerHTML = data;
+    }
+}
+
+// Init
+loadData();
